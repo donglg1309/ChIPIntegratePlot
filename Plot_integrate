@@ -1,0 +1,211 @@
+source("/Users/dongliguo/Documents/ANAlyses_folder/AcuK_M_FacB_Summary/FacB_analysis/make_tiles_functions.R")
+#RNA_seqs_gene_expression_values<-read.table("/Users/dongliguo/Documents/ANAlyses_folder/CreA_Summary/Novel_plots/diff_out_all_RNA_seq_samples_CreA/gene_name_value_glu_ace_pro_cf.xls")
+gene_list_with_mutiple_bindings<-as.character(read.table("gene_list_with_mutiple_binding.xls")$V1)
+gene_list_with_single_bindings<-as.character(read.table("gene_list_with_single_binding.xls")$V1)
+
+
+RNA_seqs_gene_expression_values<-read.table("/Users/dongliguo/Documents/ANAlyses_folder/CreA_Summary/final_plots/Fig3/glucose_gene_expression.xls",row.names=1,header=TRUE)
+#gene_list_all<-read_files_into_character("/Users/dongliguo/Documents/ANAlyses_folder/CreA_Summary/Novel_plots/diff_out_all_RNA_seq_samples_CreA/all_the_names_in_this_study.xls")
+
+gene_list_all<-row.names(RNA_seqs_gene_expression_values)
+
+all_the_gene_names<-read_files_into_character("/Users/dongliguo/Documents/ANAlyses_folder/CreA_Summary/final_plots/Fig2/A_nidulan_10_gene_final_annotation2_names.xls")
+
+#write.table(comvert_name(read_files_into_character("TCA_cycle_genes.xls")),file="TCA_cycle_genes_formal.xls",row.names=FALSE,quote=FALSE,col.names=FALSE)
+#write.table(comvert_name(read_files_into_character("gluconeogenesis_genes.xls")),file="gluconeogenesis_genes_formal.xls",row.names=FALSE,quote=FALSE,col.names=FALSE)
+#write.table(unique(c(comvert_name(read_files_into_character("arabinose_metabolism_for_rearrange.xls")),convert_gene_list(read_files_into_character("arabinose_metabolism_for_rearrange.xls")))),file="arabinose_genes_formal.xls",row.names=FALSE,quote=FALSE,col.names=FALSE)
+
+
+#all_the_gene_names<-row.names(RNA_seqs_gene_expression_values)
+
+tiles_2<-make_tiles_for_promoter_ATG("/Users/dongliguo/Documents/ANAlyses_folder/CreA_Summary/final_plots/Fig2/A_nidulan_10_gene_final_annotation2_names.xls")
+
+CreA_glucose_GFP<-normalization_tiles_for_promoter("/Volumes/LiguoDisk/CreA_RNA_files/CreA_new_ChIP_seqs_files/bam_files_out/GLU_S4_CreA_1.bam.bed")
+#CreA_glucose_GFP<-normalization_tiles_for_promoter("/Users/dongliguo/tmp_files/bam_bed_files/53-20150930-GLU-S4-CreA-1_marge.fastq.bam.bed")
+#CreA_glucose<-normalization_tiles_for_promoter("/Users/dongliguo/tmp_files/bam_bed_files/GLU_CreA_2_CL2R1_fastq_sam.bam.bed")
+CreA_glucose<-normalization_tiles_for_promoter("/Volumes/LiguoDisk/CreA_RNA_files/CreA_new_ChIP_seqs_files/bam_files_out/GLU_HA_CreA_1.bam.bed")
+
+plot (c(0,20000),c(1400,1400),col = "gray80",xlim=c(0,10000),ylim=c(-1,1400),type="l",lwd=1,xaxt="n",axes=FALSE)
+
+all_the_input_files_metablism<-read_files_into_character("all_the_input_files_names_oxygen_plot.xls")
+
+
+####################################
+
+for ( input_file_names in 1:length(all_the_input_files_metablism))
+{
+
+
+
+my_palette2 <- colorRampPalette(c("whitesmoke","whitesmoke","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow","yellow"))(n = 100)
+
+CreA_glucose_matrix<-cbind(rowMeans(cbind(CreA_glucose[,72:214],CreA_glucose_GFP[,72:214])),rowMeans(cbind(CreA_glucose[,72:214],CreA_glucose_GFP[,72:214])))
+CreA_glucose_matrix[CreA_glucose_matrix>1000]=2000
+#CreA_glucose_matrix[CreA_glucose_matrix<300]=300
+plot_figures_out<-function(input_list)
+{
+input_matrix<-CreA_glucose_matrix[1:length(input_list),]
+for ( i in 1:length(input_list))
+{
+        input_matrix[i,]=CreA_glucose_matrix[all_the_gene_names%in%input_list[i],]
+}
+return(input_matrix)
+}
+#heatmap.2(plot_figures_out(acetate_key_genes2),margins=c(5,20),notecex=0,notecol="yellow",symm=FALSE,trace=c("none"),cexRow = 1.3,density.info=c("none"),col=my_palette2[1:100],Colv=FALSE,Rowv=FALSE)
+
+match_colors2<-function(input_files,color_values,length_input)
+{
+output_colors<-NULL
+the_continous_values<-seq(from=1,to=2000,length.out=length_input)
+        for ( i in 1:length(input_files))
+        {
+                for ( j in 1:length(the_continous_values) )
+                {
+                        if(input_files[i]==2000)
+                        {output_colors[i]=color_values[length_input]
+                        break}
+                        if(input_files[i]<=the_continous_values[j+1]&&input_files[i]>=the_continous_values[j])
+                        {
+                        output_colors[i]<-color_values[j]
+                        break
+                        }
+                }
+        }
+return(output_colors)
+}
+
+
+
+
+#the_color_used<-match_colors2(plot_figures_out(acetate_key_genes2)[,1],my_palette2[1:100],100)
+
+#plot (c(0,2000),c(950,950),col = "gray80",xlim=c(0,2200),ylim=c(-1,1000),type="l",lwd=1,xaxt="n",axes=FALSE)
+#for ( i in 1:length(the_color_used))
+#{
+#points (c(10+50*i,10+50*i),c(1370-100*input_file_names,1370-100*input_file_names),pch=15,col=the_color_used[i],cex=1)
+#}
+
+
+##################################
+
+
+acetate_key_genes2<-read_files_into_character(all_the_input_files_metablism[input_file_names])
+
+output_gene_expression<-matrix(0,nrow=length(acetate_key_genes2),ncol=6)
+
+output_gene_list<-NULL
+d=1
+for ( i in 1:length(acetate_key_genes2))
+{
+        output_gene_expression[i,]<-as.numeric(RNA_seqs_gene_expression_values[gene_list_all%in%acetate_key_genes2[i],])
+}
+
+gene_expression_alteration<-rowMeans(output_gene_expression[,4:6])/rowMeans(output_gene_expression[,1:3])
+gene_expression_alteration[is.na(gene_expression_alteration)]=1
+gene_expression_alteration[is.infinite(gene_expression_alteration)]=10
+gene_expression_alteration2<-log2(gene_expression_alteration)
+gene_expression_alteration2[gene_expression_alteration2>3]=3
+gene_expression_alteration2[gene_expression_alteration2<c(-3)]=-3
+
+library("gplots")
+my_palette <- colorRampPalette(c("blue","blue","blue","whitesmoke","whitesmoke","red","red", "red"))(n = 100)
+
+#heatmap.2(as.matrix(cbind(gene_expression_alteration2,gene_expression_alteration2)),margins=c(5,20),notecex=0,notecol="yellow",symm=FALSE,trace=c("none"),cexRow = 1.3,density.info=c("none"),col=my_palette[20:80],Colv=FALSE,Rowv=FALSE)
+
+match_colors<-function(input_files,color_values,length_input)
+{
+output_colors<-NULL
+the_continous_values<-seq(from=-3,to=3,length.out=length_input)
+        for ( i in 1:length(input_files))
+        {
+                for ( j in 1:length(the_continous_values) )
+                {
+                        if(input_files[i]==3)
+                        {output_colors[i]=color_values[length_input]
+                        break}
+                        if(input_files[i]<=the_continous_values[j+1]&&input_files[i]>=the_continous_values[j])
+                        {
+                        output_colors[i]<-color_values[j]
+                        break
+                        }
+                }
+        }
+return(output_colors)
+}
+
+
+
+
+binding_values_A<-plot_figures_out(acetate_key_genes2)[,1]
+
+binding_values<-plot_figures_out(acetate_key_genes2)[,1]
+
+binding_values[binding_values<250]=250
+binding_values[!acetate_key_genes2%in%c(gene_list_with_mutiple_bindings,gene_list_with_single_bindings)]=1
+binding_values[acetate_key_genes2%in%c(gene_list_with_mutiple_bindings,gene_list_with_single_bindings)]=2000
+
+binding_values[binding_values<600&binding_values>250]=500
+binding_values[binding_values>300]=2000
+binding_values_out_formal<-NULL
+expression_values_out_formal<-NULL
+gene_list_output_formal<-NULL
+
+
+for ( i in 1:length(table(binding_values)))
+{
+        if ( i == 1 )
+        {
+                binding_values_out<-binding_values[binding_values>=as.numeric(names(rev(table(binding_values)))[1])]
+                expression_values_out<-gene_expression_alteration2[binding_values>=as.numeric(names(rev(table(binding_values)))[1])]
+                gene_list_output_out<-acetate_key_genes2[binding_values>=as.numeric(names(rev(table(binding_values)))[1])]
+                binding_values_out_formal<-binding_values_out[order(expression_values_out,decreasing=TRUE)]
+                expression_values_out_formal<-expression_values_out[order(expression_values_out,decreasing=TRUE)]
+                gene_list_output_formal<-gene_list_output_out[order(expression_values_out,decreasing=TRUE)]
+                binding_values_out<-NULL
+                expression_values_out<-NULL
+                gene_list_output_out<-NULL
+        }
+
+        if ( i != 1 )
+        {
+                binding_values_out<-binding_values[binding_values>=as.numeric(names(rev(table(binding_values)))[i])&binding_values<as.numeric(names(rev(table(binding_values)))[i-1])]
+                expression_values_out<-gene_expression_alteration2[binding_values>=as.numeric(names(rev(table(binding_values)))[i])&binding_values<as.numeric(names(rev(table(binding_values)))[i-1])]
+                gene_list_output_out<-acetate_key_genes2[binding_values>=as.numeric(names(rev(table(binding_values)))[i])&binding_values<as.numeric(names(rev(table(binding_values)))[i-1])]
+                binding_values_out_formal<-c(binding_values_out_formal,binding_values_out[order(expression_values_out,decreasing=TRUE)])
+                expression_values_out_formal<-c(expression_values_out_formal,expression_values_out[order(expression_values_out,decreasing=TRUE)])
+                gene_list_output_formal<-c(gene_list_output_formal,gene_list_output_out[order(expression_values_out,decreasing=TRUE)])
+                binding_values_out<-NULL
+                expression_values_out<-NULL
+                gene_list_output_out<-NULL
+        }
+}
+
+
+
+the_color_used_v1<-match_colors(expression_values_out_formal,my_palette[20:80],60)
+
+#plot (c(0,2000),c(1000,1000),col = "gray80",xlim=c(0,2200),ylim=c(-1,1000),type="l",lwd=1,xaxt="n",axes=FALSE)
+for ( i in 1:length(the_color_used_v1))
+{
+points (c(10+50*i,10+50*i),c(1400-100*input_file_names,1400-100*input_file_names),pch=22,col="gray",bg=the_color_used_v1[i],lwd=1.5,cex=1.5)
+}
+
+the_color_used_v2<-match_colors2(binding_values_out_formal,my_palette2[1:100],100)
+
+#plot (c(0,2000),c(950,950),col = "gray80",xlim=c(0,2200),ylim=c(-1,1000),type="l",lwd=1,xaxt="n",axes=FALSE)
+for ( i in 1:length(the_color_used_v2))
+{
+points (c(10+50*i,10+50*i),c(1370-100*input_file_names,1370-100*input_file_names),pch=21,col="gray",bg=the_color_used_v2[i],lwd=1.5,cex=1.5)
+}
+
+
+write.table(convert_gene_list(gene_list_output_formal),file=paste(all_the_input_files_metablism[input_file_names],"_ordered.xls",sep=""),row.names=FALSE,col.names=FALSE,quote=FALSE)
+
+
+
+########################
+}
+
+
+
+
